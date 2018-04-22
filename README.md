@@ -10,7 +10,7 @@ The tools aim to improve decision making by reducing the time needed for hand
 calculations usually done using external tools. Please read the disclaimer below
 before using this software.
 
-Get the [**Binance Ninja™ Chrome extension**](http://bit.ly/binance-ninja-gh).
+Get the [**Binance™ Ninja Chrome extension**](http://bit.ly/binance-ninja-gh).
 
 ## Donations
 
