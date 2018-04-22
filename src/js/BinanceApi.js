@@ -9,6 +9,24 @@ function BinanceApi(options) {
   this.fetch = options.fetch;
 }
 
+BinanceApi.prototype.getTickerPrices = function() {
+  return this.fetchJson('/api/v3/ticker/price');
+}
+
+BinanceApi.prototype.buildPriceMap = function(ticker, symbol) {
+  var matchPattern = new RegExp('.*' + symbol + '$');
+  var replacePattern = new RegExp(symbol + '$');
+  return (
+      ticker
+      .filter(p => p.symbol.match(matchPattern))
+      .reduce(
+          (acc, p) => {
+            acc[p.symbol.replace(replacePattern, '')] = p.price;
+            return acc;
+          },
+          {}));
+}
+
 BinanceApi.prototype.convert = function(options) {
   return this.fetchJson(
       "/exchange/public/convert?" + Util.buildQueryString(options));

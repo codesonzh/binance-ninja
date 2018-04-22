@@ -20,7 +20,7 @@
     ]
   }, 
   "homepage_url": "https://github.com/codesonzh/binance-ninja", 
-  "version": "0.0.3", 
+  "version": "0.0.4", 
   "manifest_version": 2, 
   "content_scripts": [
     {

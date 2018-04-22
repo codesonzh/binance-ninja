@@ -1,29 +1,80 @@
 // The extra column descriptors.
 var EXTRA_BALANCE_COLUMNS = [
   {
-    'key': 'lastBtcPrice',
-    'title': 'BTC Price',
-    'setting': 'Last price (BTC)',
-    'description': 'Last price of the coin in BTC (real-time sync)',
-    'class': 'bg-neutral',
-    deps: {state: false, row: ['equalValue', 'total']},
+    key: 'lastBtcPrice',
+    title: 'BTC Price',
+    setting: 'Last price (BTC)',
+    description: 'Last price of the coin in BTC (real-time sync)',
+    class: 'bg-neutral',
+    default_visibility: true,
+    deps: {state: ['btcPriceOf'], row: ['coin']},
     compute: function(row, state) {
-      return (row.equalValue(0) / row.total(1)).toFixed(8);
-    },
-    'default_visibility': true
+      return state.btcPriceOf(row.coin());
+    }
   },
   {
-    'key': 'lastUsdtPrice',
-    'title': 'USDT Price',
-    'setting': 'Last price (USDT)',
-    'description': 'Last price of the coin in USDT (real-time sync)',
-    'class': 'bg-neutral',
-    deps: {state: ['btcValue'], row: ['equalValue', 'total']},
-    compute: function(row, state) {
-      return '$ ' + (
-          row.equalValue(0) / row.total(1) * state.btcValue(0)).toFixed(2);
+    key: 'lastUsdtPrice',
+    title: 'USDT Price',
+    setting: 'Last price (USDT)',
+    description: 'Last price of the coin in USDT (real-time sync)',
+    class: 'bg-neutral',
+    default_visibility: true,
+    deps: {
+      state: ['btcValue', 'usdtPriceOf', 'btcPriceOf'],
+      row: ['coin', 'equalValue', 'total']
     },
-    'default_visibility': true
+    compute: function(row, state) {
+      var isMarket = true;
+      var price = state.usdtPriceOf(row.coin(), null);
+
+      if (price === null) {
+        isMarket = false;
+        price = state.btcPriceOf(row.coin()) * state.btcValue(0);
+      }
+
+      if (isNaN(price)) {
+        return undefined;
+      }
+
+      return {
+        title: isMarket ? 'USDT market price' : 'Converted from BTC',
+        isMarket: isMarket,
+        value: price,
+        format: 'USD'
+      };
+    }
+  },
+  {
+    key: 'usdtValue',
+    title: 'USDT Value',
+    setting: 'USDT Value',
+    description: 'Estimated USD value of your coin holdings',
+    class: 'bg-neutral',
+    default_visibility: true,
+    deps: {
+      state: ['btcValue', 'usdtPriceOf'],
+      row: ['coin', 'total', 'equalValue']
+    },
+    compute: function(row, state) {
+      var isMarket = true;
+      var price = state.usdtPriceOf(row.coin()) * row.total();
+
+      if (isNaN(price)) {
+        isMarket = false;
+        price = row.equalValue(0) * state.btcValue(0);
+      }
+
+      if (isNaN(price)) {
+        return undefined;
+      }
+
+      return {
+        title: isMarket ? 'USDT market value' : 'Converted from BTC',
+        isMarket: isMarket,
+        value: price,
+        format: 'USD'
+      };
+    }
   },
   /*
   {
@@ -50,20 +101,7 @@ var EXTRA_BALANCE_COLUMNS = [
     'class': '',
     'default_visibility': true
   },
-  */
-  {
-    'key': 'usdtValue',
-    'title': 'USDT Value',
-    'setting': 'USDT Value',
-    'description': 'Estimated USD value of your coin holdings',
-    'class': 'bg-neutral',
-    deps: {state: ['btcValue'], row: ['equalValue']},
-    compute: function(row, state) {
-      return '$ ' + (row.equalValue(0) * state.btcValue(0)).toFixed(2);
-    },
-    'default_visibility': true
-  },
-  /*
+  --
   {
     'key': 'eraningsSlsBtc',
     'title': 'Earnings *',

@@ -7,13 +7,26 @@ function State(state) {
     (function(key) {
       var getterName = key;
       var setterName = "set" + key.capitalize();
-      self[getterName] = function(def) {
-        return state[key] || def;
+      self[getterName] = function(def, mapDef) {
+        if (!(key in state)) {
+          return def;
+        } else if (typeof state[key] == 'object' && typeof def != 'undefined') {
+          return state[key][def] || mapDef;
+        } else {
+          return state[key];
+        }
       }
-      self[setterName] = function(value) {
-        var oldValue = state[key];
-        state[key] = value;
-        self.dispatchEvent(key, {value: value, oldValue: oldValue});
+      self[setterName] = function(mixed, atKeyValue) {
+        if (typeof state[key] == 'object' && typeof atKeyValue != 'undefined') {
+          var oldValue = state[key][atKeyValue];
+          state[key][mixed] = atKeyValue;
+          self.dispatchEvent(
+              key, {key: key, value: atKeyValue, oldValue: oldValue});
+        } else {
+          var oldValue = state[key];
+          state[key] = mixed;
+          self.dispatchEvent(key, {value: mixed, oldValue: oldValue});
+        }
       }
       self.listeners[key] = [];
     })(key);
@@ -30,14 +43,6 @@ State.prototype.createLockedHandler = function(lockName, handler) {
       self[setterName](false);
     }
   };
-}
-
-State.prototype.setViaPromiseResult = function(key, promiseFactory) {
-  var self = this;
-  var setterName = "set" + key.capitalize();
-  promiseFactory().then(function(result) {
-    self[setterName](result);
-  });
 }
 
 State.prototype.addEventListener = function(eventName, handler) {
@@ -74,12 +79,46 @@ function BalanceRow($row) {
 
 function Ninja(options) {
   this.api = options.api;
+  this.settings = null;
   this.state = new State({
     // The value of BTC in USDT.
     btcValue: null,
     // Whether the UI is getting updated.
-    digesting: false
+    digesting: false,
+    // Mapping of coin symbol to it's ticker BTC price.
+    btcPriceOf: null,
+    // Mapping fo coin symbol to it's ticker USDT price.
+    usdtPriceOf: null,
   });
+}
+
+Ninja.prototype.formatCell = function(mixed) {
+  if (typeof mixed == 'undefined' || mixed === null) {
+    return 'n/a';
+  }
+
+  if (typeof mixed != 'object') {
+    return mixed;
+  }
+
+  var cellData = mixed;
+  var displayValue = 'n/a';
+
+  if (cellData.format == 'USD') {
+    displayValue = '$ ' + (cellData.value * 1.0).toFixed(2);
+  } else {
+    displayValue = (cellData.value * 1.0).toFixed(8);
+  }
+
+  if (cellData.isMarket) {
+    displayValue =
+        '<strong title="' + cellData.title + '">' + displayValue + '</strong>';
+  } else {
+    displayValue =
+        '<span title="' + cellData.title + '">' + displayValue + '</span>';
+  }
+
+  return displayValue;
 }
 
 Ninja.prototype.initUi = function() {
@@ -109,7 +148,8 @@ Ninja.prototype.addColumn = function(options) {
     $cell.insertBefore($row.find(".action"));
 
     var updateCell = ninja.state.createLockedHandler('digesting', function() {
-      $cell.html(options.compute(balanceRow, ninja.state));
+      $cell.html(
+          ninja.formatCell(options.compute(balanceRow, ninja.state)));
     });
 
     if (options.deps.state) {
@@ -123,7 +163,7 @@ Ninja.prototype.addColumn = function(options) {
     }
 
     var balanceRow = new BalanceRow($row);
-    $cell.html(options.compute(balanceRow, ninja.state));
+    $cell.html('...');
   });
 
   $(".binance-ninja." + options.key).toggleClass(
@@ -158,21 +198,38 @@ Ninja.prototype.init = function() {
   var ninja = this;
   Util.log("Started.");
 
-  ninja.state.setViaPromiseResult('btcValue', function() {
-    return ninja.api.convert({
-      from: 'BTC',
-      to: 'USDT',
-      amount: '1'
-    }).then(function(r) {
-      return r.price;
-    });
+  var promiseChain = [];
+
+  promiseChain.push(
+    loadSettings().then(function(settings) {
+      ninja.settings = settings;
+      Util.log("Loaded settings");
+    }));
+
+  promiseChain.push(
+      ninja.api.convert({
+        from: 'BTC',
+        to: 'USDT',
+        amount: '1'
+      }).then(function(r) {
+        Util.log("Lodeded BTC value");
+        ninja.state.setBtcValue(r.price);
+      }));
+
+  promiseChain.push(
+      ninja.api.getTickerPrices().then(function(r) {
+        ninja.state.setBtcPriceOf(ninja.api.buildPriceMap(r, 'BTC'));
+        ninja.state.setUsdtPriceOf(ninja.api.buildPriceMap(r, 'USDT'));
+        Util.log("Loaded price maps");
+      }));
+
+  $(function() {
+    ninja.initUi();
+    ninja.initColumns(ninja.settings);
   });
 
-  ninja.initUi();
-  $(function() {
-    loadSettings().then(function(settings) {
-      ninja.initColumns(settings);
-    });
+  Promise.all(promiseChain).then(function() {
+    Util.log("Initial loading complete.");
   });
 
   onSettingsChanged(ninja.applySettings.bind(ninja));
