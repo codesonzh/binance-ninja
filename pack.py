@@ -59,7 +59,7 @@ if __name__ == '__main__':
   # Prevent packing if changes were not commited.
   check_git_tree_clean()
   new_version = upgrade_version("src/manifest.json")
-  filename = 'dist/poloniex-ninja-%s.zip' % new_version
+  filename = 'dist/binance-ninja-%s.zip' % new_version
   if os.path.exists(filename):
     os.remove(filename)
   make_zipfile(filename, "src")
