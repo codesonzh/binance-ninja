@@ -48,7 +48,7 @@ All computation is done on the client, however some data may be requested using
 the fetch or XHR API exclusively from the Binance™ server (only GET requests)
 in order to provide more context and to be up to date.
 
-The extension is only requesting access to [www.|api.]binance.com and no other
+The extension is only requesting access to [www.|info.]binance.com and no other
 origins, hence no data is being collected and the program only operates in the
 browser. An additional storage permission is requested to be able to persist the
 user settings for the extension (Chrome sync mechanism). This does not interfere
