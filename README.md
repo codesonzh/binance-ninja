@@ -3,10 +3,10 @@
 ![Balance columns](https://github.com/codesonzh/binance-ninja/blob/master/docs/balances.png?raw=true&x=1)
 
 Binance™ Ninja is a Chrome extension which provides simple tools and utilities
-which are otherwise unavailable on the Binance™ website during trading and
+that are otherwise unavailable on the Binance™ website during trading and
 auditing.
 
-The tools aim to improve decision making by reducing the time needed for hand
+The extension aim to improve decision making by reducing the time needed for hand
 calculations usually done using external tools. Please read the disclaimer below
 before using this software.
 
