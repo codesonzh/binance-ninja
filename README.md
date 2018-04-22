@@ -1,5 +1,7 @@
 # Binance™ Ninja
 
+![Balance columns](https://github.com/codesonzh/binance-ninja/blob/master/docs/balances.png?raw=true&x=1)
+
 Binance™ Ninja is a Chrome extension which provides simple tools and utilities
 which are otherwise unavailable on the Binance™ website during trading and
 auditing.
@@ -21,7 +23,7 @@ Consider donating 0.002 BTC or more to this address:
 
 
 Donations are the only mechanism of getting something in return for investing
-my spare time developing PoloNinja. Your contribution, however small, is a
+my spare time developing Binance Ninja. Your contribution, however small, is a
 clear message of support and acceptance.
 
 Thanks for supporting development of Binance™ Ninja!
@@ -29,39 +31,13 @@ Thanks for supporting development of Binance™ Ninja!
 ## Features
 
 * Extra balance columns for better stats and tracking
-* Real-time ticker of current prices and holdings
-* Filtering of untraded coins (e.g. to see earnings for sold out coins)
 * Easy settings via Chrome toolbox or right-click context menu
-* Inline donation info at withdrawal form (accepting various coins)
 
 The extra balance columns are as follows:
 
 * **BTC Price** - The last market price of the coin in BTC
 * **USDT Price** - The last market price of the coin in USDT
-* **AVG Buy Price** - the average weighted buy price which justifies the current
-  balance of the coin; we consider the transaction history backwards up to the
-  point where the net balance was 0 (including deposits and withdrawals) - this
-  will match your trade history analysis only if you follow the same algorithm.
-* **EST Buy Value** - the estimated buy value of the current balance (Balance *
-  AVG Buy Price)
-* **Change** - The growth comparing the current BTC Value against AVG Buy Value,
-  this indicator tells you if you're currently losing or gaining money
 * **USD Value** - Estimated value of the coin in USDT (BTC converted to USD)
-* **Earnings** - Total earnings at last sale in BTC. Given the coin trade
-  history (against BTC only), we compute the earnings and exclude the last
-  consecutive purchases you made. The fees are also deducted so it's net profit
-  or loss without the last purchases.
-* **Earnings USD** - Same as above, converted according to current USD/BTC
-  ratio.
-
-**Notice!**
-
-AVG Buy Price, AVG Buy Value and Change columns only consider BTC transactions
-against an altcoin other than USDT. This means that for example ETH and XMR
-exchanges for other altcoins are not taken into account (the Change column may
-be incorrect as well as the AVG columns).
-
-![Balance columns](https://github.com/codesonzh/binance-ninja/blob/master/docs/balances.png?raw=true)
 
 
 ## Privacy
