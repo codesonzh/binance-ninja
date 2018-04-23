@@ -4,7 +4,7 @@ Binance™ Ninja is a Chrome extension which provides simple tools and utilities
 that are otherwise unavailable on the Binance™ website during trading and
 auditing.
 
-The extension aim to improve decision making by reducing the time needed for hand
+The extension aims to improve decision making by reducing the time needed for hand
 calculations usually done using external tools. Please read the disclaimer below
 before using this software.
 
