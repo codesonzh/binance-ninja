@@ -36,8 +36,8 @@ Thanks for supporting development of Binance™ Ninja!
 The extra balance columns are as follows:
 
 * **BTC Price** - The last market price of the coin in BTC
-* **USDT Price** - The last market price of the coin in USDT
-* **USD Value** - Estimated value of the coin in USDT (BTC converted to USD)
+* **USDT Price** - The last market price of the coin in USDT (or converted from BTC)
+* **USDT Value** - The estimated market value of the coin in USDT (or converted from BTC)
 
 
 ## Privacy
