@@ -1,13 +1,25 @@
 .th > .items > div.binance-ninja {
-  background-color: #f2ebdc !important;
+  background-color: #f2ebdc;
+  outline: 4px solid #f2ebdc;
+  color: #777 !important;
 }
 
 .td > .items > div.binance-ninja {
-  background-color: #f7f5f2 !important;
+  display: table-cell;
+  background-color: #fdfbf8;
+  outline: 4px solid #fdfbf8;
+  min-height: 100%;
+}
+
+li.td:hover > .items > div.binance-ninja {
+  display: table-cell;
+  background-color: #faf4e5;
+  outline: 4px solid #faf4e5;
+  min-height: 100%;
 }
 
 span.binance-ninja-filter-option {
-  background-color: #f2faff !important;
+  background-color: #f2faff;
   border: 1px solid #8cbcbd;
   padding-left: 3px;
 }
