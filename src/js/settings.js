@@ -188,12 +188,12 @@ var CONTEXT_MENU = [
   {'type': 'normal',
    'key': 'donate',
    'title': 'Buy me a coffee (or beer)',
-   'url': 'http://bit.ly/polo-ninja-coffee'},
+   'url': 'http://bit.ly/binance-ninja-coffee'},
   {'type': 'separator'},
   {'type': 'normal',
    'key': 'rate_extension',
    'title': 'Rate extension',
-   'url': 'http://bit.ly/polo-ninja'},
+   'url': 'http://bit.ly/binance-ninja'},
   {'type': 'normal',
    'key': 'send_feedback',
    'title': 'Send feedback',
@@ -210,8 +210,7 @@ var CONTEXT_MENU = [
 
 // List of URLs where to show the context menu.
 var CONTEXT_MENU_URL_PATTERNS = [
-  "https://www.binance.com/*",
-  "https://binance.com/*"
+  "https://www.binance.com/*"
 ];
 
 // Current settings.

@@ -1,64 +1,4 @@
-// import BinanceApi, Util
-
-function State(state) {
-  var self = this;
-  self.listeners = {};
-  for (var key in state) {
-    (function(key) {
-      var getterName = key;
-      var setterName = "set" + key.capitalize();
-      self[getterName] = function(def, mapDef) {
-        if (!(key in state)) {
-          return def;
-        } else if (typeof state[key] == 'object' && typeof def != 'undefined') {
-          return state[key][def] || mapDef;
-        } else {
-          return state[key];
-        }
-      }
-      self[setterName] = function(mixed, atKeyValue) {
-        if (typeof state[key] == 'object' && typeof atKeyValue != 'undefined') {
-          var oldValue = state[key][atKeyValue];
-          state[key][mixed] = atKeyValue;
-          self.dispatchEvent(
-              key, {key: key, value: atKeyValue, oldValue: oldValue});
-        } else {
-          var oldValue = state[key];
-          state[key] = mixed;
-          self.dispatchEvent(key, {value: mixed, oldValue: oldValue});
-        }
-      }
-      self.listeners[key] = [];
-    })(key);
-  }
-}
-
-State.prototype.createLockedHandler = function(lockName, handler) {
-  var self = this;
-  var setterName = "set" + lockName.capitalize();
-  return function() {
-    if (!self[lockName]()) {
-      self[setterName](true);
-      handler();
-      self[setterName](false);
-    }
-  };
-}
-
-State.prototype.addEventListener = function(eventName, handler) {
-  var self = this;
-  self.listeners[eventName].push(handler);
-}
-
-State.prototype.dispatchEvent = function(eventName, eventArgs) {
-  var self = this;
-  if (!(eventName in self.listeners)) {
-    return;
-  }
-  for (let handler of self.listeners[eventName]) {
-    handler(eventArgs);
-  }
-}
+// import BinanceApi, Util, State
 
 function BalanceRow($row) {
   var self = this;
@@ -79,16 +19,18 @@ function BalanceRow($row) {
 
 function Ninja(options) {
   this.api = options.api;
+  this.page = options.page;
   this.settings = null;
   this.state = new State({
+    loading: false,
     // The value of BTC in USDT.
     btcValue: null,
     // Whether the UI is getting updated.
     digesting: false,
     // Mapping of coin symbol to it's ticker BTC price.
-    btcPriceOf: null,
+    btcPriceOf: {},
     // Mapping fo coin symbol to it's ticker USDT price.
-    usdtPriceOf: null,
+    usdtPriceOf: {},
   });
 }
 
@@ -135,17 +77,16 @@ Ninja.prototype.addColumn = function(options) {
     visible: false
   }, options);
 
-  var $columnHeader = $('<div class="binance-ninja f-right"></div>');
+  var $columnHeader = ninja.page.createColumn();
   $columnHeader.addClass(options.key);
   $columnHeader.html(options.title);
-  $columnHeader.insertBefore(
-      $(".accountInfo-lists > li.th > .items > .action"));
+  $columnHeader.insertBefore(ninja.page.getPivotColumnHeader());
 
-  $(".accountInfo-lists > li.td > .items").each(function() {
+  ninja.page.getRows().each(function() {
     var $row = $(this);
-    var $cell = $('<div class="binance-ninja f-right"></div>');
+    var $cell = ninja.page.createCell();
     $cell.addClass(options.key);
-    $cell.insertBefore($row.find(".action"));
+    $cell.insertBefore(ninja.page.getPivotCell($row));
 
     var updateCell = ninja.state.createLockedHandler('digesting', function() {
       $cell.html(
@@ -173,7 +114,7 @@ Ninja.prototype.addColumn = function(options) {
 Ninja.prototype.initColumns = function(settings) {
   var ninja = this;
 
-  EXTRA_BALANCE_COLUMNS.forEach(function(col){
+  EXTRA_BALANCE_COLUMNS.forEach(function(col) {
     if (col.compute) {
       ninja.addColumn(Object.assign(
           col,
@@ -200,6 +141,8 @@ Ninja.prototype.init = function() {
 
   var promiseChain = [];
 
+  ninja.state.setLoading(true);
+
   promiseChain.push(
     loadSettings().then(function(settings) {
       ninja.settings = settings;
@@ -223,13 +166,24 @@ Ninja.prototype.init = function() {
         Util.log("Loaded price maps");
       }));
 
-  $(function() {
+  ninja.page.addEventListener('DOMContentLoaded', function() {
     ninja.initUi();
-    ninja.initColumns(ninja.settings);
   });
+
+  promiseChain.push(
+      new Promise(function(resolve, reject) {
+        ninja.page.addEventListener('BalancesLoaded', function() {
+          ninja.initColumns(ninja.settings);
+          resolve();
+          Util.log("Initiliazed columns.");
+        });
+      }));
+
+  ninja.page.run();
 
   Promise.all(promiseChain).then(function() {
     Util.log("Initial loading complete.");
+    ninja.state.setLoading(false);
   });
 
   onSettingsChanged(ninja.applySettings.bind(ninja));
