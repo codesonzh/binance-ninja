@@ -10,7 +10,12 @@ function BalanceRow($row) {
       }
       (function($cell) {
         self[className] = function(def) {
-          return $cell.text() || def;
+          var text = $cell.text();
+          if (text) {
+            return text.trim();
+          } else {
+            return def;
+          }
         }
       })($cell);
     });
